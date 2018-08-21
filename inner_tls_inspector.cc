@@ -34,7 +34,7 @@ InnerTlsInspectorFilter::InnerTlsInspectorFilter() :
     SSL_CTX_set_tlsext_servername_callback(
           ssl_ctx_.get(), [](SSL* ssl, int* out_alert, void*) -> int {
             InnerTlsInspectorFilter* filter = static_cast<InnerTlsInspectorFilter*>(SSL_get_app_data(ssl));
-            ENVOY_LOG(error, "SSL_CTX_set_tlsext_servername_callback");
+            std::cout << "***** InnerTlsInspectorFilter.SSL_CTX_set_tlsext_servername_callback: " << SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name) << std::endl;
             if(filter != nullptr) {}
             filter->onServername(SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name));
 
@@ -92,16 +92,20 @@ void InnerTlsInspectorFilter::parseClientHello(const void* data, size_t len) {
 Network::FilterStatus InnerTlsInspectorFilter::onData(Buffer::Instance& data, bool end_stream) {
   ENVOY_CONN_LOG(error, "InnerTlsInspector: got {} bytes", read_callbacks_->connection(), data.length());
 //  virtual void copyOut(size_t start, uint64_t size, void* data) const PURE;
-  int len = (data.length() < TLS_MAX_CLIENT_HELLO) ? data.length() : TLS_MAX_CLIENT_HELLO ;
+  size_t len = (data.length() < TLS_MAX_CLIENT_HELLO) ? data.length() : TLS_MAX_CLIENT_HELLO ;
   data.copyOut(0, len, buf_);
 
-  for(int a=0; a<len; a++) {
-    std::cout << *(buf_+a);
-  }
-  std::cout << std::endl;
-
+//  for(size_t a=0; a<len; a++) {
+//    std::cout << *(buf_+a);
+//  }
+//  std::cout << std::endl;
 
   if(end_stream) {}
+
+  parseClientHello(buf_, len);
+
+
+
 //  read_callbacks_->connection().write(data, end_stream);
 //  ASSERT(0 == data.length());
   return Network::FilterStatus::Continue;
@@ -116,6 +120,7 @@ void InnerTlsInspectorFilter::done(bool success) {
 
 void InnerTlsInspectorFilter::onServername(absl::string_view name) {
   if (!name.empty()) {
+    read_callbacks_->connection().setRequestedServerName(name);
 //    cb_->socket().setRequestedServerName(name);
   }
   clienthello_success_ = true;
