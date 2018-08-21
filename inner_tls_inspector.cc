@@ -14,14 +14,14 @@ InnerTlsInspectorFilter::InnerTlsInspectorFilter() :
     ssl_ctx_(SSL_CTX_new(TLS_with_buffers_method())),
     ssl_(newSsl()) {
 
-    ENVOY_LOG(error, "InnerTlsInspectorFilter");
+    ENVOY_LOG(debug, "InnerTlsInspectorFilter");
     SSL_CTX_set_options(ssl_ctx_.get(), SSL_OP_NO_TICKET);
     SSL_CTX_set_session_cache_mode(ssl_ctx_.get(), SSL_SESS_CACHE_OFF);
     SSL_CTX_set_select_certificate_cb(
           ssl_ctx_.get(), [](const SSL_CLIENT_HELLO* client_hello) -> ssl_select_cert_result_t {
             const uint8_t* data;
             size_t len;
-            ENVOY_LOG(error, "SSL_CTX_set_select_certificate_cb");
+            ENVOY_LOG(debug, "SSL_CTX_set_select_certificate_cb");
             if (SSL_early_callback_ctx_extension_get(
                     client_hello, TLSEXT_TYPE_application_layer_protocol_negotiation, &data, &len)) {
               InnerTlsInspectorFilter* filter = static_cast<InnerTlsInspectorFilter*>(SSL_get_app_data(client_hello->ssl));
@@ -51,7 +51,7 @@ thread_local uint8_t InnerTlsInspectorFilter::buf_[TLS_MAX_CLIENT_HELLO];
 
 
 bssl::UniquePtr<SSL> InnerTlsInspectorFilter::newSsl() {
-    ENVOY_LOG(error, "newSsl()");
+    ENVOY_LOG(debug, "newSsl()");
     return bssl::UniquePtr<SSL>{SSL_new(ssl_ctx_.get())};
 }
 
@@ -90,7 +90,7 @@ void InnerTlsInspectorFilter::parseClientHello(const void* data, size_t len) {
 
 
 Network::FilterStatus InnerTlsInspectorFilter::onData(Buffer::Instance& data, bool end_stream) {
-  ENVOY_CONN_LOG(error, "InnerTlsInspector: got {} bytes", read_callbacks_->connection(), data.length());
+  ENVOY_CONN_LOG(debug, "InnerTlsInspector: got {} bytes", read_callbacks_->connection(), data.length());
 //  virtual void copyOut(size_t start, uint64_t size, void* data) const PURE;
   size_t len = (data.length() < TLS_MAX_CLIENT_HELLO) ? data.length() : TLS_MAX_CLIENT_HELLO ;
   data.copyOut(0, len, buf_);
@@ -112,7 +112,7 @@ Network::FilterStatus InnerTlsInspectorFilter::onData(Buffer::Instance& data, bo
 }
 
 void InnerTlsInspectorFilter::done(bool success) {
-  ENVOY_LOG(error, "inner tls inspector: done: {}", success);
+  ENVOY_LOG(debug, "inner tls inspector: done: {}", success);
 //  timer_.reset();
 //  file_event_.reset();
 //  cb_->continueFilterChain(success);
