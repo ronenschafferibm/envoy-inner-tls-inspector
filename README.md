@@ -51,37 +51,10 @@ To build the Envoy static binary:
     ```
 
 
-1. Currently, the filter simply logs the incomind data. We can spot the inner SNI.
+1. In the second envoy's log, one can spot the inner SNI `edition.cnn.com` while the outer SNI is `envoy2.local`
     ```
-    [2018-08-19 17:40:13.003][25076][error][filter] external/envoy/source/extensions/filters/listener/tls_inspector/tls_inspector.cc:74] tls inspector: new connection accepted
-    [2018-08-19 17:40:13.003][25076][error][filter] external/envoy/source/extensions/filters/listener/tls_inspector/tls_inspector.cc:149] tls inspector: recv: 170
-    SSL_CTX_set_tlsext_servername_callback: envoy2.local
-    [2018-08-19 17:40:13.003][25076][error][filter] external/envoy/source/extensions/filters/listener/tls_inspector/tls_inspector.cc:176] tls inspector: done: true
-    [2018-08-19 17:40:13.004][25076][error][filter] inner_tls_inspector.cc:54] newSsl()
-    [2018-08-19 17:40:13.004][25076][error][filter] inner_tls_inspector.cc:17] InnerTlsInspectorFilter
-    [2018-08-19 17:40:13.072][25076][error][filter] inner_tls_inspector.cc:93] [C2] InnerTlsInspector: got 517 bytes
-    �M@�����Ntd�t�n�/�!�_݁�
-                                      �L��0�,�(�$��
-    ����kjih9876�����2�.�*�&���=5��/�+�'�#��	����g@?>3210����EDCB�1�-�)�%�����A�
-    �5edition.cnn.com
-                         
-    
-
-
-     3t
-                                           http/1.1�
-    [2018-08-19 17:40:13.143][25076][error][filter] inner_tls_inspector.cc:93] [C2] InnerTlsInspector: got 126 bytes
-    FBA��h�I��nh�P�R��
-                              ٚ1�:�z�����w�^/Fs�E.�e�����D��ͷNy�(�^e�z٘�i��������=�mE���
-    �E$쑴=Û\S'
-    [2018-08-19 17:40:13.210][25076][error][filter] inner_tls_inspector.cc:93] [C2] InnerTlsInspector: got 109 bytes
-    h�^e�z٘Ő����ҽ�rPyp�Ow'�a��2,c5�:O@���E�Պ/,&�q�q�>�Y��@Q�i��m�`vk�q� �����
-    ��a����� Unﶲ�
-    [2018-08-19 17:40:13.279][25076][error][filter] inner_tls_inspector.cc:93] [C2] InnerTlsInspector: got 31 bytes
-    �^e�z٘ƌ�f�
-    .�	�����	��ѣ
-    [2018-08-19T14:40:13.004Z] "- - -" 0 - 783 6642 342 - "-" "-" "-" "-" "151.101.193.67:443"
-    [2018-08-19 17:54:42.911][25071][info][main] external/envoy/source/server/drain_manager_impl.cc:63] shutting down parent after drain
+    ***** InnerTlsInspectorFilter.SSL_CTX_set_tlsext_servername_callback: edition.cnn.com
+    [2018-08-21T11:53:18.537Z] "- - -" 0 - 783 6641 332 - "-" "-" "-" "-" "151.101.1.67:443"
     ```
 
 ## How it works
